@@ -28,6 +28,9 @@ let  UserModel = new Schema({
         type:String,
         default:''
     },
+    recoveryPassword:{
+       type:String
+    },
      createdOn:{
         type:Date,
         default:Date.now()

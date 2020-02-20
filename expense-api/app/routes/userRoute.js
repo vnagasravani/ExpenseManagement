@@ -7,6 +7,8 @@ let setRouter = (app)=>{
   app.post('/login',userController.login);
   app.get('/all', authmw.isAuthorised, userController.getAllUser);
   app.get('/user/:id',userController.getSingleUser);
+  app.post('/resetpassword',userController.resetPasswordFunction);
+  app.post('/updatepassword',userController.updatePasswordFunction);
   app.post('/delete/:userId',userController.deleteUser);
   app.put('/edit/:userId',userController.editUser);
   app.post('/out',authmw.isAuthorised,userController.logout );

@@ -8,6 +8,16 @@ const shortid = require('shortid');
 const logger = require('pino')();
 const password = require('./../libs/generatePasswordLib');
 const time = require('./../libs/timeLib');
+const nodemailer = require('nodemailer');
+const transport = require('nodemailer-sendgrid-transport');
+
+const transporter = nodemailer.createTransport(transport({
+    auth:{
+        
+        api_key:'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'
+    }
+
+}));
 
 let userModel = mongoose.model('UserModel');
 let authModel = mongoose.model('AuthModel');
@@ -182,6 +192,15 @@ let signUp = (req, res) => {
         .then(createUser)
         .then((resolve) => {
             delete resolve.password;
+            transporter.sendMail({
+                from:'vnags@SpeechGrammarList.com',
+                to:resolve.email,
+                subject:"sign up sucessfull",
+                html:`<p>signup successfull</p>`
+
+            }).then(data=>{
+                logger.info(data);
+            })
             let apiresponse = response.generate(false, 'user created', 200, resolve);
             res.send(apiresponse);
         }).catch((err) => {
@@ -393,6 +412,179 @@ let logout = (req, res) => {
 
 }
 
+let resetPasswordFunction=(req,res)=>{
+
+    let checkUserEmail=()=>{
+        return new Promise((resolve,reject)=>{
+            if(req.body.email){
+                
+                userModel.findOne({'email':req.body.email},(err,result)=>{
+                    if(err){
+                        logger.error('some error occured while resetting password');
+                        let apiResponse=response.generate(true,'error occured',500,null)
+                        reject(apiResponse);
+                    }
+                    else if(check.isEmpty(result)){
+                        logger.error('detail not found while resetting password');
+                        let apiResponse=response.generate(true,'email Id is not valid',500,null)
+                        reject(apiResponse);
+                    }
+                    resolve(result);
+                })
+            }
+            else{
+                let apiResponse=response.generate(true,'email is empty',500,null);
+                resolve(apiResponse);
+            }
+        })
+    }
+
+let resetPassword=(userDetail)=>{
+    return new Promise((resolve,reject)=>{
+        let recovery={
+            recoveryPassword:shortid.generate()
+        }
+
+        userModel.updateOne({'userId':userDetail.userId},recovery,(err,result)=>{
+            if(err){
+                logger.error('some error occured while setting recovery password');
+                let apiResponse=response.generate(true,'error occured',500,null)
+                reject(apiResponse);
+            }
+            else if(check.isEmpty(result)){
+                logger.error('detail not found while setting recovery password');
+                let apiResponse=response.generate(true,'recoveryPassword is not being updated',500,null)
+                reject(apiResponse);
+            }
+            resolve(result);
+            transporter.sendMail({
+                from:'vnags@SpeechGrammarList.com',
+                to:userDetail.email,
+                subject:"password reset",
+                html: `<h4> Hi ${userDetail.firstName}</h4>
+                       <p>
+                           We got a request to reset your To-Do list account password associated with this ${req.body.email} Email. <br>
+                           <br>We have successfully reset your password. Please use following password as a recovery password while resetting the Password <br>
+                           <br> Recovery Password : ${recovery.recoveryPassword} 
+                       </p>
+                        To-Do List
+                        <br><b>Ashish mangukiya </b> `    
+    
+            }).then(data=>{
+                logger.info(data);
+            })
+
+
+        })
+    })
+}
+    checkUserEmail(req,res)
+    .then(resetPassword)
+    .then((resolve)=>{
+        
+        let apiResponse=response.generate(false,'recoveryPassword has been sent to your email plz check email',200,resolve)
+        res.send(apiResponse);
+    }).catch((err)=>{
+        res.send(err);
+    })
+
+}//end reset password function
+
+let updatePasswordFunction = (req, res) => {
+
+    let findUser = () => {
+        return new Promise((resolve, reject) => {
+            if (req.body.recoveryPassword) {
+                userModel.findOne({ recoveryPassword: req.body.recoveryPassword }, (err, userDetails) => {
+                    /* handle the error here if the User is not found */
+                    if (err) {
+                        console.log(err)
+                        logger.error('Failed To Retrieve User Data while updating password')
+                        /* generate the error message and the api response message here */
+                        let apiResponse = response.generate(true, 'Failed To Find User Details to update password', 500, null)
+                        reject(apiResponse)
+                        /* if Company Details is not found */
+                    } else if (check.isEmpty(userDetails)) {
+                        /* generate the response and the console error message here */
+                        logger.error('No User Found  while updating password')
+                        let apiResponse = response.generate(true, 'No User Details Found to update password', 404, null)
+                        reject(apiResponse)
+                    } else {
+                        /* prepare the message and the api response here */
+                        logger.info('User Found');
+                        resolve(userDetails)
+                    }
+                });
+
+            } else {
+                let apiResponse = response.generate(true, '"recoveryPassword" parameter is missing', 400, null)
+                reject(apiResponse)
+            }
+        })
+    }
+
+    let passwordUpdate = (userDetails) => {
+        return new Promise((resolve, reject) => {
+
+            let options = {
+                password: password.hashpassword(req.body.password),
+            }
+
+            userModel.update({ 'userId': userDetails.userId }, options).exec((err, result) => {
+                if (err) {
+                    console.log(err)
+                    logger.error(err.message+'User Controller:updatePasswordFunction')
+                    let apiResponse = response.generate(true, 'Failed To reset user Password', 500, null)
+                    reject(apiResponse)
+                } else if (check.isEmpty(result)) {
+                    logger.info('No User Found with given Details to update password')
+                    let apiResponse = response.generate(true, 'No User Found', 404, null)
+                    reject(apiResponse)
+                } else {
+
+
+                    let apiResponse = response.generate(false, 'Password Updated successfully', 200, result)
+                    resolve(apiResponse)
+                    //Creating object for sending welcome email
+                    transporter.sendMail({
+                        from:'vnags@SpeechGrammarList.com',
+                        to:userDetails.email,
+                        subject:"password update",
+                        html:`<p>password updated successfully</p>`
+        
+                    }).then(data=>{
+                        logger.info(data);
+                    })
+
+                    
+
+
+                }
+            });// end user model update
+        });
+    }//end passwordUpdate
+
+    findUser(req, res)
+        .then(passwordUpdate)
+        .then((resolve) => {
+            let apiResponse = response.generate(false, 'Password Update Successfully', 200, resolve)
+            res.status(200)
+            res.send(apiResponse)
+        })
+        .catch((err) => {
+            console.log("errorhandler");
+            console.log(err);
+            res.status(err.status)
+            res.send(err)
+        })
+
+
+}
+
+
+
+
+
 
 
 module.exports = {
@@ -402,7 +594,9 @@ module.exports = {
     getSingleUser: getSingleUser,
     deleteUser: deleteUser,
     editUser: editUser,
-    logout: logout
+    logout: logout,
+    resetPasswordFunction:resetPasswordFunction,
+    updatePasswordFunction:updatePasswordFunction
 }
 
 

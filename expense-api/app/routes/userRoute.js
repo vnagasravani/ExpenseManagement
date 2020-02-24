@@ -5,7 +5,7 @@ const authmw = require('./../middleware/authMiddleWare')
 let setRouter = (app)=>{
   app.post('/signup', userController.signUp);
   app.post('/login',userController.login);
-  app.get('/all', authmw.isAuthorised, userController.getAllUser);
+  app.get('/all',  userController.getAllUser);
   app.get('/user/:id',userController.getSingleUser);
   app.post('/resetpassword',userController.resetPasswordFunction);
   app.post('/updatepassword',userController.updatePasswordFunction);

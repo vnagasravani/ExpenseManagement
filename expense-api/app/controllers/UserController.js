@@ -4,29 +4,25 @@ const validation = require('./../libs/paramsValidationLib');
 const response = require('./../libs/responseLib');
 const check = require('./../libs/checkLib');
 const tokenLib = require('./../libs/tokenLib');
+const emailLib = require('./../libs/emailLib');
 const shortid = require('shortid');
 const logger = require('pino')();
 const password = require('./../libs/generatePasswordLib');
 const time = require('./../libs/timeLib');
 const nodemailer = require('nodemailer');
-const transport = require('nodemailer-sendgrid-transport');
-
-const transporter = nodemailer.createTransport(transport({
-    auth:{
-        
-        api_key:'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'
-    }
-
-}));
 
 let userModel = mongoose.model('UserModel');
 let authModel = mongoose.model('AuthModel');
 
 let getAllUser = (req, res) => {
-    logger.info(req.user);
+    logger.info(req.body);
+    
+    const skip = parseInt(req.body.skip)
     userModel.find()
         .select(' -__v -_id')
+        .skip(skip*6)
         .lean()
+        .limit(6)
         .exec((err, result) => {
             if (err) {
                 console.log(err)
@@ -152,6 +148,7 @@ let signUp = (req, res) => {
 
                             let user = new userModel({
                                 userId: shortid.generate(),
+                                userName:`${req.body.firstName} ${req.body.lastName}`,
                                 firstName: req.body.firstName,
                                 lastName: req.body.lastName,
                                 email: req.body.email,
@@ -192,15 +189,14 @@ let signUp = (req, res) => {
         .then(createUser)
         .then((resolve) => {
             delete resolve.password;
-            transporter.sendMail({
+            let mailOptions = {
                 from:'vnags@SpeechGrammarList.com',
                 to:resolve.email,
                 subject:"sign up sucessfull",
                 html:`<p>signup successfull</p>`
 
-            }).then(data=>{
-                logger.info(data);
-            })
+            }
+            emailLib.sendEmail(mailOptions);
             let apiresponse = response.generate(false, 'user created', 200, resolve);
             res.send(apiresponse);
         }).catch((err) => {
@@ -457,7 +453,7 @@ let resetPassword=(userDetail)=>{
                 reject(apiResponse);
             }
             resolve(result);
-            transporter.sendMail({
+            let mailOptions={
                 from:'vnags@SpeechGrammarList.com',
                 to:userDetail.email,
                 subject:"password reset",
@@ -470,11 +466,8 @@ let resetPassword=(userDetail)=>{
                         To-Do List
                         <br><b>Ashish mangukiya </b> `    
     
-            }).then(data=>{
-                logger.info(data);
-            })
-
-
+            }
+            emailLib.sendEmail(mailOptions);
         })
     })
 }

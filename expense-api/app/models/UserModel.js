@@ -8,6 +8,10 @@ let  UserModel = new Schema({
         type:String,
         unique:true
     },
+    userName:{
+        type:String,
+        default:''
+    },
     firstName:{
         type:String,
         default:''
@@ -27,6 +31,10 @@ let  UserModel = new Schema({
     password:{
         type:String,
         default:''
+    },
+    groupsList:{
+       type:Array,
+       default:[]
     },
     recoveryPassword:{
        type:String

@@ -3,7 +3,7 @@ appConfig.port = 3000;
 appConfig.allowedCorsOrgin = "*";
 appConfig.env = "dev";
 appConfig.db = {
-    uri: 'mongodb://127.0.0.1:27017/chatAppDB'
+    uri: 'mongodb://127.0.0.1:27017/expenseDB'
 };
 appConfig.apiVersion = 'api/v1';
 module.exports = {

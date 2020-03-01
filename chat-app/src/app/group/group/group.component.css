@@ -13,6 +13,10 @@
     border-radius:2px;
     margin:auto;
 }
+.count {
+    background-color:#ebd1d2;
+    margin: 2px;  
+}
 
 .modal-dialog {
     width: 100em;

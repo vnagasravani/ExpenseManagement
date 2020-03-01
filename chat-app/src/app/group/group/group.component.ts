@@ -21,6 +21,7 @@ export class GroupComponent implements OnInit {
   public checkedUsers = [];
   public expenseId;
   public expenses = [];
+  public expense ;
   public peopleNotInvolve = [];
   public filteredPayors = [];
   public removingPeople = [];
@@ -64,7 +65,15 @@ export class GroupComponent implements OnInit {
     console.log('expenseId', this.expenseId);
   }
 
-  public getExpenseById = (expenseId)=>{
+  public getExpenseById = (expenseId) => {
+    this.expenseId = expenseId;
+    let filterExpense = this.expenses.find(expense => expense.expenseId === expenseId);
+    this.expense = filterExpense;
+    console.log('getExpenseById',this.expense);
+
+  }
+
+  public getExpensepeopleToRemove = (expenseId)=>{
     this.expenseId = expenseId;
     let filterExpense = this.expenses.find(expense => expense.expenseId === expenseId);
     this.removingPeople = filterExpense.people;
@@ -168,6 +177,7 @@ export class GroupComponent implements OnInit {
       (data) => {
         if (data.status == 200) {
           this.expenses = data.data;
+          console.log('get expenses is called',this.expenses);
         }
       },
       (err) => {
@@ -287,7 +297,7 @@ export class GroupComponent implements OnInit {
             }
 
           }
-          this.getExpenseById(data.data.expenseId);
+          this.getExpensepeopleToRemove (data.data.expenseId);
 
         }
         else {

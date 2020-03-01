@@ -64,7 +64,7 @@
 
                                            
                                                 <button type="button" class="dropdown-item"
-                                                    (click)="getExpenseById(expense.expenseId)" data-toggle="modal"
+                                                    (click)="getExpensepeopleToRemove(expense.expenseId)" data-toggle="modal"
                                                     data-target="#deletepeople">Delete People</button>
         
                                         <button type="button" class="dropdown-item"
@@ -75,7 +75,10 @@
                                 </div>
                                 <a class="btn btn-primary button" (click)="delExpense(expense.expenseId)">Delete</a>
                                 <a href="#" class="btn btn-primary button">History</a>
-                                <a href="#" class="btn btn-primary button">Expense Info</a>
+                                <button type="button" class="btn btn-primary button" data-toggle="modal"
+                                data-target="#expenseinfo" (click)="getExpenseById(expense.expenseId)">
+                                ExpenseInfo
+                               </button>
                             </div>
                             <div class="card-footer text-muted">
                                 2 days ago
@@ -227,6 +230,55 @@
         </div>
     </div>
 
+   
+
+<!--modal for expenseInfo-->
+<div class="modal fade" id="expenseinfo" tabindex="-1" role="dialog" aria-labelledby="exampleModalScrollableTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header center">
+                    <h4 class="modal-title w-100">{{expense.expenseName}}</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div >
+                        <h6 class="display-8">payor:</h6>
+                        <p class="lead">{{expense.whoPaid.name}}</p>
+                    </div>
+                    <h4 >People Involved In Expense<span
+                            class="badge badge-light badge-pill count">{{expense.people.length}}</span>:</h4>
+                    <ul class="list-group list-group-flush" *ngFor="let participant of expense.people">
+                        <li>
+                            <div class="list-group-item">
+                                <h6>{{participant.name}}</h6>
+                            </div>
+
+                        </li>
+                    </ul>
+                    <h4 >Amount To Be Paid:</h4>      
+                <ul class="list-group list-group-flush" *ngFor="let participant of expense.people">
+                    <li *ngIf = "!(participant.name === expense.whoPaid.name)">
+                        <div class="list-group-item" >
+                            <h6>{{participant.name}}:{{(expense.amount)/(expense.people.length - 1)}}</h6>
+                        </div>
+
+                    </li>
+                </ul>
+
+                </div>
+                <div class="modal-footer">
+                    <div>
+                        <label>@Creation time Of Expense:</label>
+                        <strong> <em> {{expense.createdOn | date:'short'}}</em> </strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 
     <!-- Modal for display for group details -->
@@ -343,3 +395,38 @@
             </div>
         </div>
     </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

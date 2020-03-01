@@ -52,13 +52,19 @@ export class DashboardComponent implements OnInit {
     console.log(name);
      this.appService.groupCreation(name , description).subscribe(
        (data)=>{
-          if(data.status==200)
-          this.router.navigate(['/group',name]);
+          if(data.status==200){
+            this.groups.push(data.data);
+            this.toastr.success(data.message);
+          }
+          
           else
-          this.toastr.warning(data.message);
+          {
+            this.toastr.warning(data.message);
+          }
+          
        },
        (err)=>{
-        this.toastr.error(err.message);
+        console.log(err.message);
        }
      )
   }

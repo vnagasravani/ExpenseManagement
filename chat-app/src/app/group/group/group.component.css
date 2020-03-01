@@ -1,0 +1,39 @@
+.center{
+    text-align: center;
+}
+.description{
+    height:10%;
+    width:90%;
+    margin:auto;
+    background-color: bisque;
+}
+.participants{
+    background-color:#ebd1d2;
+    width:80%;
+    border-radius:2px;
+    margin:auto;
+}
+
+.modal-dialog {
+    width: 100em;
+    min-height: 100%;
+    padding: 0;
+    margin: auto;
+}
+
+.check{
+    margin-left: 22%;
+}
+.selection{
+    margin-left: 17%;
+}
+.submission{
+    margin-left:35%;
+    display:block;
+    padding-top:15%;
+    
+
+}
+.button{
+    margin:10px;
+}

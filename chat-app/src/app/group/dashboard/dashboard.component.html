@@ -1,0 +1,85 @@
+<div class="fluid-container">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand">Expense Management</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto">
+        <li>
+          <a  class="nav-link" href="#" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">create Group</a>
+        </li>
+      </ul>
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item  my-2 my-lg-0 ">
+          <div class="input-group">
+            <input class=" form-control col-10 " type="text" placeholder="Search" #searchInput
+              (keyup.enter)="searchGroup()">
+               
+            <span *ngIf=searchValue> <button class="clear" (click)="unsearch()">
+              X
+              </button>
+            </span>
+          </div>
+        </li>
+
+        <li class="nav-item ">
+          <a class="nav-link" (click)="logout()">Logout</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <div class="heading">
+    <h3>List Of Groups</h3>
+  </div>
+  <div class="list-group ">
+    <ng-container *ngIf=!searchValue>
+      <div *ngFor="let group of groups">
+        <a  class="list-group-item list-group-item-action active group-list" [routerLink]="['/group',group.groupName]">
+          {{group.groupName}}
+        </a>
+        
+      </div>
+    </ng-container>
+
+    <div *ngFor="let fgroup of filteredGroups">
+      <a  class="list-group-item list-group-item-action active group-list" [routerLink]="['/group',fgroup.groupName]" >
+        {{fgroup.groupName}}
+      </a>
+    </div>
+
+  </div>
+
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Create Group</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="groupName" class="col-form-label" >GroupName:</label>
+            <input type="text" class="form-control" #name>
+            <div class="form-group shadow-textarea">
+              <label for="description">Desription</label>
+              <textarea class="form-control z-depth-1" #description rows="3" placeholder="Write group description here..."></textarea>
+            </div>
+
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" (click)="createGroup(name.value,description.value)">create group</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>

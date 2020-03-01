@@ -1,0 +1,45 @@
+<div class="container">
+    <div class="card">
+        <div class="card-header header">
+            Add Participants
+        </div>
+        <div class="card-body">
+            <div class="search input-group">
+            <input type="text" class="form-control" #searchInput placeholder="search here to find users..." (keypress)="search($event)">
+            <span *ngIf=searching> <button class="clear" (click)="unsearch()">clear</button> </span>
+        </div>
+            
+
+            <div class="row cardsbody" *ngIf="!searching">
+                <div class=" col-md-3 cards" *ngFor="let user of users">
+                    <div class="card icard">
+                        <div class="card-body">
+                            <h5 class="card-title">{{user.userName}}</h5>
+                            <button class="btn btn-primary" (click)="add(user.userId)" [disabled]="addDisable(user.userId)">add</button>
+                         </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="row cardsbody" >
+                <div class=" col-md-3 cards" *ngFor="let suser of searchedUsers">
+                    <div class="card icard">
+                        <div class="card-body">
+                            <h5 class="card-title">{{suser.userName}}</h5>
+                            <button class="btn btn-primary"  (click)="add(suser.userId)" [disabled]="addDisable(suser.userId)" >add</button>
+                         </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div *ngIf = "!searching"> 
+            <span> <button  class="btn btn-primary left " (click)="getPrevPages()" [disabled]="pageValue==0">prev</button> </span>
+             <span><button  class="btn btn-primary right " (click)="getNextPages()"  [disabled]="checkNext()">next</button></span>
+            </div>
+        </div>
+    </div>
+
+</div>

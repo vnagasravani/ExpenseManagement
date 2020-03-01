@@ -1,0 +1,345 @@
+<div class="container-fluid">
+    <div class="card">
+        <h5 class="card-header center">{{groupName}}</h5>
+        <div class="card-body">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+
+                <button class="navbar-toggler" type="button" data-toggle="collapse"
+                    data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item active">
+                            <button class="btn btn-primary button" routerLink="/dashboard">Dashboard </button>
+
+                        </li>
+                        <li class="nav-item">
+                            <button class="btn btn-primary button" [routerLink]="['/search',groupName]">Add
+                                people</button>
+                        </li>
+                        <li class="nav-item">
+                            <button type="button" class="btn btn-primary button" data-toggle="modal"
+                                data-target="#expensecreation">
+                                Create Expense
+                            </button>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item active">
+                            <button type="button" class="btn btn-primary button" data-toggle="modal"
+                                data-target="#aboutgroup">
+                                GroupInfo
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            <div class="row">
+                <div class="col-md-6" *ngFor="let expense of expenses">
+                    <div class="card">
+                        <div class="card text-center">
+                            <div class="card-header">
+                                {{expense.expenseName}}
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">This expense includes the amount {{expense.amount}} paid by
+                                    {{expense.whoPaid.name}}</p>
+                                <div class="dropdown">
+                                    <button class="btn btn-secondary dropdown-toggle" type="button"
+                                        id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
+                                        aria-expanded="false">
+                                        Edit Expense
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                        <button type="button" class="dropdown-item"
+                                            (click)="getExpenseId(expense.expenseId)" data-toggle="modal"
+                                            data-target="#editamount">Edit Amount</button>
+
+                                        <button type="button" class="dropdown-item"
+                                            (click)="filterPayors(expense.expenseId)" data-toggle="modal"
+                                            data-target="#editpayor">Edit Payor</button>
+
+                                           
+                                                <button type="button" class="dropdown-item"
+                                                    (click)="getExpenseById(expense.expenseId)" data-toggle="modal"
+                                                    data-target="#deletepeople">Delete People</button>
+        
+                                        <button type="button" class="dropdown-item"
+                                            (click)="filterPeople(expense.expenseId)" data-toggle="modal"
+                                            data-target="#addpeople">Add people</button>
+
+                                    </div>
+                                </div>
+                                <a class="btn btn-primary button" (click)="delExpense(expense.expenseId)">Delete</a>
+                                <a href="#" class="btn btn-primary button">History</a>
+                                <a href="#" class="btn btn-primary button">Expense Info</a>
+                            </div>
+                            <div class="card-footer text-muted">
+                                2 days ago
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--modal for edit payor-->
+
+    <div class="modal fade" id="editpayor" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Payor</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form #editpayor="ngForm" (ngSubmit)="editWhoPaid(editpayor.value);editpayor.reset()">
+                        {{editpayor.value|json}}
+                        <div class="form-group row">
+                            <div class="col-sm-8">Payor:</div>
+                            <div class="col-sm-6 selection">
+                                <select id="inputState" class="form-control" name="payor" ngModel>
+                                    <option [ngValue]="{id:participant.id,name:participant.name}"
+                                        *ngFor='let participant of filteredPayors'>
+                                        {{participant.name}}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row modal-footer ">
+                            <div class="col-sm-10 submission">
+                                <button type="submit " class="btn btn-primary">Edit Payor</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!--modal for delete people-->
+
+    <div class="modal fade" id="deletepeople" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Remove Peole</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form #deletePeople="ngForm" (ngSubmit)="removePeople(deletePeople.value);deletePeople.reset()">
+                    {{deletePeople.value|json}}
+                    <div class="form-group row">
+                        <div class="col-sm-8"> Remove People Involved:</div>
+                        <div class="col-sm-10">
+                            <select name="people" ngModel multiple>
+                                <option *ngFor="let people of removingPeople"
+                                    [ngValue]="people.id">
+                                    {{ people.name }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row modal-footer ">
+                        <div class="col-sm-10 submission">
+                            <button type="submit " class="btn btn-primary">Add people</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- modal for add people-->>
+    <div class="modal fade" id="addpeople" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form #addPeople="ngForm" (ngSubmit)="editPeople(addPeople.value);addPeople.reset()">
+                        {{addPeople.value|json}}
+                        <div class="form-group row">
+                            <div class="col-sm-8"> Add People Involved:</div>
+                            <div class="col-sm-10">
+                                <select name="people" ngModel multiple>
+                                    <option *ngFor="let people of peopleNotInvolve"
+                                        [ngValue]="{id:people.userId,name:people.userName}">
+                                        {{ people.userName }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row modal-footer ">
+                            <div class="col-sm-10 submission">
+                                <button type="submit " class="btn btn-primary">Add people</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal for edit amount-->
+    <div class="modal fade" id="editamount" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Edit Amount</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label class="col-form-label">Amount to be edited:</label>
+                            <input type="text" class="form-control" id="message-text" #amount>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" (click)="editAmount(amount.value)">Edit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Modal for display for group details -->
+    <div class="modal fade" id="aboutgroup" tabindex="-1" role="dialog" aria-labelledby="exampleModalScrollableTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header center">
+                    <h4 class="modal-title w-100">{{groupName}}</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="description">
+                        <h6 class="display-8">Description</h6>
+                        <p class="lead">{{groupDetails.description}}</p>
+                    </div>
+                    <hr class="my-4">
+                    <h4 class="center participants">participants<span
+                            class="badge badge-light badge-pill">{{groupMembers.length}}</span></h4>
+                    <ul class="list-group list-group-flush" *ngFor="let participant of groupMembers">
+                        <li>
+                            <div class="list-group-item">
+                                <h6>{{participant.userName}}</h6>
+                                <i>{{participant.email}}</i>
+                            </div>
+
+                        </li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <div>
+                        <label>@Creator Of Group:</label>
+                        <strong> <em> {{groupDetails.createdBy.userName}}</em> </strong>
+                    </div>
+                    <div>
+                        <label>created at:</label>
+                        <strong>{{groupDetails.groupGenerationTime | date:'medium'}}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for expense creation -->
+    <div class="modal fade" id="expensecreation" tabindex="-1" role="dialog"
+        aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title w-100 center" id="exampleModalScrollableTitle">Expense Creation</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form #expenseForm="ngForm" (ngSubmit)="createExpense();expenseForm.reset()">
+
+                        {{expenseInfo| json}}
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label">Expense:</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" [(ngModel)]="expenseInfo.expenseName"
+                                    name="expenseName">
+
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label">Amount:</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="amount" [(ngModel)]="expenseInfo.amount">
+
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-sm-8">People Involved:</div>
+                            <div class="col-sm-10">
+                                <!-- <div class="form-check check" *ngFor = 'let participant of groupMembers' >
+                                    <input class="form-check-input" type="checkbox"  ngModel  [value] = "participant.userId" name="people">
+                                    <label class="form-check-label" for="gridCheck1">
+                                        {{participant.userName}}
+                                    </label>
+                                </div> -->
+                                <select name="people" [(ngModel)]="expenseInfo.people" multiple>
+                                    <option *ngFor="let participant of groupMembers"
+                                        [ngValue]="{id:participant.userId,name:participant.userName}">
+                                        {{ participant.userName }}
+                                    </option>
+                                </select>
+                                <!-- <ng-multiselect-dropdown [placeholder]="'people involved in expense '" [data]="groupMembers"
+                                    [(ngModel)]="checkedUsers" [settings]="dropdownSettings" name="people"></ng-multiselect-dropdown> -->
+
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-sm-8">Payor:</div>
+                            <div class="col-sm-6 selection">
+                                <select id="inputState" class="form-control" name="payor"
+                                    [(ngModel)]="expenseInfo.whoPaid">
+                                    <option [ngValue]="{id:participant.id,name:participant.name}"
+                                        *ngFor='let participant of expenseInfo.people'>
+                                        {{participant.name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row ">
+                            <div class="col-sm-10 submission">
+                                <button type="submit " class="btn btn-primary">Create</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>

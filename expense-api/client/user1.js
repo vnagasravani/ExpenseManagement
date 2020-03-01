@@ -19,7 +19,7 @@ let chat = () =>{
       });
 
       $("#add").on('click', function () {
-        socket.emit(`add-group`,msg);
+        socket.emit(`add`,msg);
         console.log('while emit'+msg.receiverid);
     
       });

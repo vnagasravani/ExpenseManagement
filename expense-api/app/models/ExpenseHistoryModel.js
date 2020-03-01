@@ -24,7 +24,16 @@ const ExpenseHistoryModel = new Schema({
                 type:String
             },
             newPeople:{
-                type:Array
+                type:[{
+                    id:String,
+                    name:String
+                }]
+            },
+            oldPeople:{
+                type:[{
+                    id:String,
+                    name:String 
+                }]
             },
             modifiedTime:{
                 type:Date,

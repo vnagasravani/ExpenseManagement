@@ -16,16 +16,25 @@ let  ExpenseModel = new Schema({
         type:String,
         default:''
     },
+    groupName:{
+        type:String,
+        default:''
+    },
     amount:{
         type:String,
         default:''
     },
     whoPaid:{
-        type:String,
-        default:''
+      type:  {
+           id:String,
+           name:String
+        }
     },
     people:{
-       type:[],
+       type:[{
+        id:String,
+        name:String 
+       }],
        default:[]
     },
      createdOn:{

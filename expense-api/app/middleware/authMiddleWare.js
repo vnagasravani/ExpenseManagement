@@ -16,12 +16,12 @@ let isAuthorised = (req,res,next)=>{
             if(err)
             {
                 logger.info('error occured while retriving aut in  middle ware')
-               let apiresponse = response.generate(true,500,'failed to get authtoken',null);
+               let apiresponse = response.generate(true,'failed to get authtoken',500,null);
                res.send(apiresponse);
             }
             else if(check.isEmpty(result)){
                 logger.info('authtoken not found')
-                let apiresponse = response.generate(true,500,'authtoken not found',null);
+                let apiresponse = response.generate(true,'authtoken not found',500,null);
                 res.send(apiresponse);          
             }
             else{
@@ -29,7 +29,7 @@ let isAuthorised = (req,res,next)=>{
                     if(err)
                     {
                         logger.info('authtoken expires');
-                        let apiresponse = response.generate(true,500,'authtoken may expired or incorrect',null);
+                        let apiresponse = response.generate(true,'authtoken may expired or incorrect',500,null);
                          res.send(apiresponse);  
 
                     }
@@ -45,7 +45,7 @@ let isAuthorised = (req,res,next)=>{
     }
     else{
         logger.info('else part is working');
-        let apiresponse = response.generate(true,500,'authtoken parameter is missing',null);
+        let apiresponse = response.generate(true,'authtoken parameter is missing',500,null);
         res.send(apiresponse);  
 
     }//end isAuthorized 

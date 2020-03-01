@@ -15,14 +15,20 @@ let userModel = mongoose.model('UserModel');
 let authModel = mongoose.model('AuthModel');
 
 let getAllUser = (req, res) => {
-    logger.info(req.body);
     
-    const skip = parseInt(req.body.skip)
+    
+    const pageValue = parseInt(req.body.pageValue)
+    const limit = parseInt(req.body.limit);
+    let data = {
+        userCount:0,
+        users:null
+    }
+
     userModel.find()
         .select(' -__v -_id')
-        .skip(skip*6)
+        .skip(pageValue*limit)
         .lean()
-        .limit(6)
+        .limit(limit)
         .exec((err, result) => {
             if (err) {
                 console.log(err)
@@ -34,8 +40,14 @@ let getAllUser = (req, res) => {
                 let apiResponse = response.generate(true, 'No User Found', 404, null)
                 res.send(apiResponse)
             } else {
-                let apiResponse = response.generate(false, 'All User Details Found', 200, result)
-                res.send(apiResponse)
+                 
+                 data.users = result;
+                 userModel.find().countDocuments(function(err,result){
+                  data.userCount = result;
+                 let apiResponse = response.generate(false, 'All User Details Found', 200,data)
+                 res.send(apiResponse)
+                 })
+                 
             }
         })
 }//get all users
@@ -317,6 +329,8 @@ let login = (req, res) => {
                             let auth = new authModel({
                                 userId: tokenDetails.userId,
                                 authToken: tokenDetails.token,
+                                email:tokenDetails.userDetails.email,
+                                userName:tokenDetails.userDetails.userName,
                                 tokenSecret: tokenDetails.tokenSecret,
                                 tokenGenerationTime : time.getLocalTime()
                             });

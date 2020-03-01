@@ -38,6 +38,21 @@ let sendEmail = (sendEmailOptions) => {
 
 }
 
+let sendMails = (groupDetails , apiResponse)=>{
+    for(let group of groupDetails.groupMembers)
+    {
+        let emailOptions = {
+            from: 'expenseManagement@gmail.com',
+            to: group.email,
+            subject: 'notification',
+            html: `<p>Hi ${group.userName}</p> <br> <p>${apiResponse.message} </p>`
+        }
+     sendEmail(emailOptions);
+        
+    }
+}
+
 module.exports = {
-    sendEmail: sendEmail
+    sendEmail: sendEmail,
+    sendMails:sendMails
   }

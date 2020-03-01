@@ -76,7 +76,12 @@ let groupFormation = (req, res) => {
                             let group = new groupModel({
                                 groupId: shortid.generate(),
                                 groupName: req.body.groupName,
-                                createdOn: time.getLocalTime()
+                                description:req.body.description,
+                                createdOn: time.getLocalTime(),
+                                createdBy:{
+                                    userId:req.body.userId,
+                                    userName:req.body.userName
+                                }
 
                             });
 
@@ -112,7 +117,10 @@ let groupFormation = (req, res) => {
 
     let addGroupToUser = (groupDetails) => {
         return new Promise((resolve, reject) => {
-            userModel.updateOne({ userId: req.body.userId }, { $push: { groupsList: groupDetails.groupName } })
+            userModel.findOneAndUpdate({ userId: req.body.userId }, { $push: { groupsList: {groupName:groupDetails.groupName,
+                                                                                      groupId:groupDetails.groupId,
+                                                                                      groupGenerationTime:groupDetails.groupGenerationTime                              
+            }} },{new:true})
                 .exec((err, result) => {
                     if (err) {
                         logger.info('failed to update user while creating group');
@@ -120,18 +128,22 @@ let groupFormation = (req, res) => {
                         reject(apiresponse);
                     }
                     if (result) {
-                        logger.info(result);
-                        resolve(groupDetails);
+                        logger.info('result while creating group',result);
+                        resolve(result);
                     }
                 })
 
         })
     } //end add grouptouser
 
-    let addUserTOGroup = (groupDetails) => {
-        logger.info('adding user to group' + groupDetails);
+    let addUserTOGroup = (userDetails) => {
+        logger.info('adding user to group' + userDetails);
         return new Promise((resolve, reject) => {
-            groupModel.updateOne({ groupId: groupDetails.groupId }, { $push: { groupMembers: req.body.userId } })
+            groupModel.findOneAndUpdate({ groupName: req.body.groupName }, { $push: { groupMembers: {userId:userDetails.userId,
+                                                                                              userName:userDetails.userName,
+                                                                                              mobileNumber:userDetails.mobileNumber,
+                                                                                              email:userDetails.email    
+            } } },{new:true})
                 .exec((err, result) => {
                     if (err) {
                         logger.info('failed to update user while creating group');
@@ -140,7 +152,7 @@ let groupFormation = (req, res) => {
                     }
                     if (result) {
                         logger.info(result);
-                        resolve(groupDetails);
+                        resolve(result);
                     }
 
                 })
@@ -167,112 +179,140 @@ let groupFormation = (req, res) => {
 } //end groupFormation 
 
 
-let expenseCreation = (req, res) => {
+// let expenseCreation = (req, res) => {
 
-let createExpense = (req,res)=>{
-    logger.info('create expense');
-    let people = req.body.people
-    let array = people.split(',')
-    return new Promise ((resolve,reject)=>{
-        expenseModel.findOne({ expenseName: req.body.expenseName })
-        .exec((err, retrivedDetails) => {
-            if (err) {
-                logger.info('failed to create expense')
-                let apiresponse = response.generate(true, 'failed to create expense', 500, null);
-                reject(apiresponse);
-            }
+// let createExpense = (req,res)=>{
+//     logger.info('create expense');
+//     // let people = req.body.people
+//     // let array = people.split(',')
+//     return new Promise ((resolve,reject)=>{
+//         expenseModel.findOne({ expenseName: req.body.expenseName })
+//         .exec((err, retrivedDetails) => {
+//             if (err) {
+//                 logger.info('failed to create expense')
+//                 let apiresponse = response.generate(true, 'failed to create expense', 500, null);
+//                 reject(apiresponse);
+//             }
 
-            else {
-                if (check.isEmpty(retrivedDetails)) {
+//             else {
+//                 if (check.isEmpty(retrivedDetails)) {
 
-                    let expense = new expenseModel({
-                        expenseId: shortid.generate(),
-                        expenseName: req.body.expenseName,
-                        groupId: req.body.groupId,
-                        amount: parseInt(req.body.amount),
-                        whoPaid: req.body.whoPaid,
-                        people:array,
-                        createdOn: time.getLocalTime()
+//                     let expense = new expenseModel({
+//                         expenseId: shortid.generate(),
+//                         expenseName: req.body.expenseName,
+//                         groupId: req.body.groupId,
+//                         amount: parseInt(req.body.amount),
+//                         whoPaid: req.body.whoPaid,
+//                         //people:req.body.people,
+//                         createdOn: time.getLocalTime()
 
-                    });
+//                     });
 
-                    expense.save((err, result) => {
-                        if (err) {
-                            let apiresponse = response.generate(true, 'failed to create expense', 500, null);
-                            reject(apiresponse);
-                        }
-                        else {
-                            let newExpenseObject = expense.toObject();
-                           // let apiresponse = response.generate(false, 'expensecreated', 200, newExpenseObject);
-                            //res.send(apiresponse);
-                            logger.info(newExpenseObject);
-                            resolve(newExpenseObject);
+//                     expense.save((err, result) => {
+//                         if (err) {
+//                             let apiresponse = response.generate(true, 'failed to create expense', 500, null);
+//                             reject(apiresponse);
+//                         }
+//                         else {
+//                             let newExpenseObject = expense.toObject();
+//                            // let apiresponse = response.generate(false, 'expensecreated', 200, newExpenseObject);
+//                             //res.send(apiresponse);
+//                             logger.info(newExpenseObject);
+//                             resolve(newExpenseObject);
 
-                        }
+//                         }
 
-                    });
+//                     });
 
-                }
-                else {
-                    let apiresponse = response.generate(true, 'A expense is already existed with same expense name ', 500, null);
-                    reject(apiresponse);
-                }
-            }
+//                 }
+//                 else {
+//                     let apiresponse = response.generate(true, 'A expense is already existed with same expense name ', 500, null);
+//                     reject(apiresponse);
+//                 }
+//             }
 
-        })
-    })
-} //end create expense
+//         })
+//     })
+// } //end create expense
 
-let addToExpenseHistory = (expenseDetails)=>{
-    logger.info(expenseDetails);
-    return new Promise((resolve,reject)=>{
+// let addPeople = (expenseDetails)=>{
+//     return new Promise((resolve,reject)=>{
+//         expenseModel.findOneAndUpdate({expenseId:expenseDetails.expenseId},{$pushAll:{people:req.body.people}},{new:true})
+//         .exec((err,result)=>{
+//             if (err) {
+//                 logger.info('not able to update people while create expense');
+//                 let apiResponse = response.generate(false, 'not able to retrive expense while add people', 500, null)
+//                 reject(apiResponse);
+//             }
+//             else if (check.isEmpty(result)) {
+//                 logger.info('expense not found while add people');
+//                 let apiResponse = response.generate(false, ' expense not found while add people', 500, null)
+//                 reject(apiResponse);
+//             }
+//             else {
+//                 console.log(result);
+//                 resolve(result);
+//             }
+       
 
-        let exphistory = new expenseHistoryModel({
-            expenseId: expenseDetails.expenseId,
-            expenseHistory:[{
-                userId:req.body.userId,
-                userName:req.body.userName,
-                action:'create',
-                modifiedTime:expenseDetails.createdOn
-            }],
-            createdOn: time.getLocalTime()
+//         });
 
-        });
+//     });
+// }
 
-        exphistory.save((err, result) => {
-            if (err) {
-                let apiresponse = response.generate(true, 'failed to create expensehistory', 500, null);
-                reject(apiresponse);
-            }
-            else {
-                logger.info(result);
-                resolve(expenseDetails);
+// let addToExpenseHistory = (expenseDetails)=>{
+//     logger.info(expenseDetails);
+//     return new Promise((resolve,reject)=>{
 
-            }
+//         let exphistory = new expenseHistoryModel({
+//             expenseId: expenseDetails.expenseId,
+//             expenseHistory:[{
+//                 userId:req.body.userId,
+//                 userName:req.body.userName,
+//                 action:'create',
+//                 modifiedTime:expenseDetails.createdOn
+//             }],
+//             createdOn: time.getLocalTime()
 
-        });
+//         });
+
+//         exphistory.save((err, result) => {
+//             if (err) {
+//                 let apiresponse = response.generate(true, 'failed to create expensehistory', 500, null);
+//                 reject(apiresponse);
+//             }
+//             else {
+//                 logger.info(result);
+//                 resolve(expenseDetails);
+
+//             }
+
+//         });
 
 
-    })
-}//end  addToExpenseHistory 
+//     })
+// }//end  addToExpenseHistory 
 
-createExpense(req,res)
-.then(addToExpenseHistory)
-.then((expenseObject)=>{
-    let apiresponse = response.generate(false, 'expensecreated', 200, expenseObject);
-    res.send(apiresponse);
-}).catch((err)=>{
-    res.send(err);
-})
+// createExpense(req,res)
+// .then(addPeople)
+// .then(addToExpenseHistory)
+// .then((expenseObject)=>{
+//     let apiresponse = response.generate(false, 'expensecreated', 200, expenseObject);
+//     res.send(apiresponse);
+// }).catch((err)=>{
+//     res.send(err);
+// })
 
     
 
 
-} //end expensecreation 
+// } //end expensecreation 
 
 let getAllExpenses = (req, res) => {
     const skip = parseInt(req.body.skip)
-    expenseModel.find()
+    const limit = parseInt(req.body.limit)
+    console.log(req.body.groupName);
+    expenseModel.find({groupName:req.body.groupName})
         .select(' -__v -_id')
         .skip(skip * 6)
         .lean()
@@ -280,11 +320,11 @@ let getAllExpenses = (req, res) => {
         .exec((err, result) => {
             if (err) {
                 console.log(err)
-                logger.info(err.message, 'Expense Controller: getAllexpenses', 10)
+                logger.info( 'Expense Controller: err in getAllexpenses '+err);
                 let apiResponse = response.generate(true, 'Failed To Find Expenses', 500, null)
                 res.send(apiResponse)
             } else if (check.isEmpty(result)) {
-                logger.info(err.message, 'Expense Controller: getAllexpenses', 10)
+                logger.info( 'Expense Controller: getAllexpenses is not found')
                 let apiResponse = response.generate(true, 'No Expense Found', 404, null)
                 res.send(apiResponse)
             } else {
@@ -297,7 +337,7 @@ let getAllExpenses = (req, res) => {
 
 module.exports = {
     groupFormation: groupFormation,
-    expenseCreation: expenseCreation,
+    //expenseCreation: expenseCreation,
     getAllExpenses: getAllExpenses,
     getSingleGroup:getSingleGroup,
     getExpenseHistory:getExpenseHistory

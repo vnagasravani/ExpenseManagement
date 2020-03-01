@@ -9,13 +9,27 @@ const GroupModel = new Schema({
     groupName :{
         type:String
     },
+    description:{
+        type:String
+    },
     groupMembers:{
-        type:Array,
+        type:[{
+            userId:String,
+            userName:String,
+            email:String,
+            mobileNumber:String
+        }],
         default:[]
     },
     groupGenerationTime:{
         type:Date,
         default:Date.now()
+    },
+    createdBy : {
+        type:{
+           userId:String,
+           userName:String
+        }
     }
 });
 

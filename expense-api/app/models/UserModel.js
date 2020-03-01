@@ -33,7 +33,11 @@ let  UserModel = new Schema({
         default:''
     },
     groupsList:{
-       type:Array,
+       type:[{
+           groupId:String,
+           groupName:String,
+           groupGenerationTime:Date
+       }],
        default:[]
     },
     recoveryPassword:{

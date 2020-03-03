@@ -18,7 +18,16 @@
 
 .header{
     text-align: center;
+    background-color: #07034f;
+    color:white;
+    font-weight: 600;
+    font-size: xx-large;
 }
+
+button:disabled {
+    cursor: not-allowed;
+    pointer-events: all !important;
+  }
 
 .clear{
     height:36px; 

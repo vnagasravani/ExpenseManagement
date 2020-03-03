@@ -2,6 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AngularFontAwesomeModule } from 'angular-font-awesome';
+import { NgxSpinnerModule } from "ngx-spinner";
 //import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 import { ToastrModule } from 'ngx-toastr';
 import { AppRoutingModule } from './app-routing.module';
@@ -13,6 +14,7 @@ import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
 
+
 @NgModule({
   declarations: [
     AppComponent  
@@ -22,6 +24,7 @@ import { FormsModule } from '@angular/forms';
     BrowserAnimationsModule,
     FormsModule,
     ToastrModule.forRoot(),
+    NgxSpinnerModule,
    // NgMultiSelectDropDownModule.forRoot(),
     AngularFontAwesomeModule,
     AppRoutingModule,

@@ -1,8 +1,8 @@
 <div class="container-fluid">
     <div class="card">
-        <h5 class="card-header center">{{groupName}}</h5>
+        <h5 class="card-header center" >{{groupName}}</h5>
         <div class="card-body">
-            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <nav class="navbar navbar-expand-lg  navbar-light bg-light">
 
                 <button class="navbar-toggler" type="button" data-toggle="collapse"
                     data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
@@ -38,15 +38,18 @@
                 </div>
             </nav>
             <div class="row">
-                <div class="col-md-6" *ngFor="let expense of expenses">
-                    <div class="card">
+                <div *ngIf="loading">
+                    <ngx-spinner type="pacman" size = "medium"></ngx-spinner>
+                    </div>
+                <div class="col-md-6 expenses" [@expenseList] *ngFor="let expense of expenses">
+                    <div class="card bg-warning" >
                         <div class="card text-center">
-                            <div class="card-header">
+                            <div class="card-header bg-info">
                                 {{expense.expenseName}}
                             </div>
                             <div class="card-body">
                                 <p class="card-text">This expense includes the amount {{expense.amount}} paid by
-                                    {{expense.whoPaid.name}}</p>
+                                    {{expense.whoPaid?.name}}</p>
                                 <div class="dropdown">
                                     <button class="btn btn-secondary dropdown-toggle" type="button"
                                         id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
@@ -62,11 +65,11 @@
                                             (click)="filterPayors(expense.expenseId)" data-toggle="modal"
                                             data-target="#editpayor">Edit Payor</button>
 
-                                           
-                                                <button type="button" class="dropdown-item"
-                                                    (click)="getExpensepeopleToRemove(expense.expenseId)" data-toggle="modal"
-                                                    data-target="#deletepeople">Delete People</button>
-        
+
+                                        <button type="button" class="dropdown-item"
+                                            (click)="getExpensepeopleToRemove(expense.expenseId)" data-toggle="modal"
+                                            data-target="#deletepeople">Delete People</button>
+
                                         <button type="button" class="dropdown-item"
                                             (click)="filterPeople(expense.expenseId)" data-toggle="modal"
                                             data-target="#addpeople">Add people</button>
@@ -74,19 +77,22 @@
                                     </div>
                                 </div>
                                 <a class="btn btn-primary button" (click)="delExpense(expense.expenseId)">Delete</a>
-                                <a href="#" class="btn btn-primary button">History</a>
+                                <a type="button" class="btn btn-primary button" data-toggle="modal"
+                                    data-target="#expensehistory"
+                                    (click)="getExpenseHistory(expense.expenseId)">History</a>
                                 <button type="button" class="btn btn-primary button" data-toggle="modal"
-                                data-target="#expenseinfo" (click)="getExpenseById(expense.expenseId)">
-                                ExpenseInfo
-                               </button>
+                                    data-target="#expenseinfo" (click)="getExpenseById(expense.expenseId)">
+                                    ExpenseInfo
+                                </button>
                             </div>
-                            <div class="card-footer text-muted">
-                                2 days ago
+                            <div class="card-footer text-muted bg-info">
+                                Created on {{expense?.createdOn | date:'short'}}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <button class ="btn btn-primary load"(click)="getMoreExpenses()">Load More Expenses</button>
         </div>
     </div>
 
@@ -104,7 +110,6 @@
                 </div>
                 <div class="modal-body">
                     <form #editpayor="ngForm" (ngSubmit)="editWhoPaid(editpayor.value);editpayor.reset()">
-                        {{editpayor.value|json}}
                         <div class="form-group row">
                             <div class="col-sm-8">Payor:</div>
                             <div class="col-sm-6 selection">
@@ -117,9 +122,9 @@
                         </div>
 
                         <div class="form-group row modal-footer ">
-                            <div class="col-sm-10 submission">
-                                <button type="submit " class="btn btn-primary">Edit Payor</button>
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <div >
+                                <button type="submit " class="btn btn-primary button">Edit Payor</button>
+                                <button type="button" class="btn btn-secondary button" data-dismiss="modal">Close</button>
                             </div>
                         </div>
                     </form>
@@ -127,44 +132,42 @@
             </div>
         </div>
     </div>
-    
+
     <!--modal for delete people-->
 
     <div class="modal fade" id="deletepeople" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Remove Peole</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form #deletePeople="ngForm" (ngSubmit)="removePeople(deletePeople.value);deletePeople.reset()">
-                    {{deletePeople.value|json}}
-                    <div class="form-group row">
-                        <div class="col-sm-8"> Remove People Involved:</div>
-                        <div class="col-sm-10">
-                            <select name="people" ngModel multiple>
-                                <option *ngFor="let people of removingPeople"
-                                    [ngValue]="people.id">
-                                    {{ people.name }}
-                                </option>
-                            </select>
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Remove Peole</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form #deletePeople="ngForm" (ngSubmit)="removePeople(deletePeople.value);deletePeople.reset()">
+                        <div class="form-group row">
+                            <div class="col-sm-8"> Remove People Involved:</div>
+                            <div class="col-sm-10">
+                                <select name="people" ngModel multiple>
+                                    <option *ngFor="let rpeople of removingPeople" [ngValue]="{id:rpeople.id,name:rpeople.name}">
+                                        {{ rpeople.name }}
+                                    </option>
+                                </select>
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group row modal-footer ">
-                        <div class="col-sm-10 submission">
-                            <button type="submit " class="btn btn-primary">Add people</button>
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <div class="form-group row modal-footer ">
+                            <div >
+                                <button type="submit " class="btn btn-primary button">Remove people</button>
+                                <button type="button" class="btn btn-secondary button" data-dismiss="modal">Close</button>
+                            </div>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
     <!-- modal for add people-->>
     <div class="modal fade" id="addpeople" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
@@ -179,11 +182,10 @@
                 </div>
                 <div class="modal-body">
                     <form #addPeople="ngForm" (ngSubmit)="editPeople(addPeople.value);addPeople.reset()">
-                        {{addPeople.value|json}}
                         <div class="form-group row">
                             <div class="col-sm-8"> Add People Involved:</div>
                             <div class="col-sm-10">
-                                <select name="people" ngModel multiple>
+                                <select name="people" ngModel multiple data-toggle="tooltip" data-placement="top" title="Hold ctrl and select the users you want to add">
                                     <option *ngFor="let people of peopleNotInvolve"
                                         [ngValue]="{id:people.userId,name:people.userName}">
                                         {{ people.userName }}
@@ -192,12 +194,12 @@
                             </div>
                         </div>
                         <div class="form-group row modal-footer ">
-                            <div class="col-sm-10 submission">
-                                <button type="submit " class="btn btn-primary">Add people</button>
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <div >
+                                <button type="submit " class="btn btn-primary button">Add people</button>
+                                <button type="button" class="btn btn-secondary button" data-dismiss="modal">Close</button>
                             </div>
                         </div>
-                    </form>
+                    </form> 
                 </div>
             </div>
         </div>
@@ -214,43 +216,45 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
+                <form #editamount = "ngForm" (ngSubmit)="editAmount.reset()" >
                 <div class="modal-body">
                     <form>
                         <div class="form-group">
                             <label class="col-form-label">Amount to be edited:</label>
-                            <input type="text" class="form-control" id="message-text" #amount>
+                            <input type="text" class="form-control" id="message-text" #amount name="editAmount" ngModel>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" (click)="editAmount(amount.value)">Edit</button>
+                    <button type="button" class="btn btn-secondary button" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary button" (click)="editAmount(amount.value)">Edit</button>
                 </div>
+                </form>>
             </div>
         </div>
     </div>
 
-   
 
-<!--modal for expenseInfo-->
-<div class="modal fade" id="expenseinfo" tabindex="-1" role="dialog" aria-labelledby="exampleModalScrollableTitle"
+
+    <!--modal for expenseInfo-->
+    <div class="modal fade" id="expenseinfo" tabindex="-1" role="dialog" aria-labelledby="exampleModalScrollableTitle"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-scrollable" role="document">
             <div class="modal-content">
                 <div class="modal-header center">
-                    <h4 class="modal-title w-100">{{expense.expenseName}}</h4>
+                    <h4 class="modal-title w-100">{{expense?.expenseName}}</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div >
+                    <div>
                         <h6 class="display-8">payor:</h6>
-                        <p class="lead">{{expense.whoPaid.name}}</p>
+                        <p class="lead">{{expense?.whoPaid.name}}</p>
                     </div>
-                    <h4 >People Involved In Expense<span
-                            class="badge badge-light badge-pill count">{{expense.people.length}}</span>:</h4>
-                    <ul class="list-group list-group-flush" *ngFor="let participant of expense.people">
+                    <h4>People Involved In Expense<span
+                            class="badge badge-light badge-pill count">{{expense?.people.length}}</span>:</h4>
+                    <ul class="list-group list-group-flush" *ngFor="let participant of expense?.people">
                         <li>
                             <div class="list-group-item">
                                 <h6>{{participant.name}}</h6>
@@ -258,22 +262,81 @@
 
                         </li>
                     </ul>
-                    <h4 >Amount To Be Paid:</h4>      
-                <ul class="list-group list-group-flush" *ngFor="let participant of expense.people">
-                    <li *ngIf = "!(participant.name === expense.whoPaid.name)">
-                        <div class="list-group-item" >
-                            <h6>{{participant.name}}:{{(expense.amount)/(expense.people.length - 1)}}</h6>
-                        </div>
+                    <h4>Amount To Be Paid:</h4>
+                    <ul class="list-group list-group-flush" *ngFor="let participant of expense?.people">
+                        <li *ngIf="!(participant.name === expense.whoPaid?.name)">
+                            <div class="list-group-item">
+                                <h6>{{participant.name}}:{{(expense.amount)/(expense.people.length)}}</h6>
+                            </div>
 
-                    </li>
-                </ul>
+                        </li>
+                    </ul>
 
                 </div>
                 <div class="modal-footer">
                     <div>
-                        <label>@Creation time Of Expense:</label>
-                        <strong> <em> {{expense.createdOn | date:'short'}}</em> </strong>
+                        <label>CreationTime Of Expense:</label>
+                        <strong> <em> {{expense?.createdOn | date:'short'}}</em> </strong>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--modal for expense history-->
+
+    <div class="modal fade" id="expensehistory" tabindex="-1" role="dialog"
+        aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header center">
+                    <h4 class="modal-title w-100"> Expense History Of {{expense?.expenseName}}</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h4>Expense History:</h4>
+                    <ul class="list-group list-group-flush" *ngFor="let history of expenseHistory?.expenseHistory">
+                        <li *ngIf = "history.action === 'create'" >
+                            <div class="list-group-item">
+                               <h5>{{history.userName}} created the expense {{expense.expenseName}} </h5>
+                               <i>{{history.modifiedTime | date:'short'}}</i>
+                            </div>
+
+                        </li>
+                        <li *ngIf="history.action === 'edited the amount'">
+                            <div class="list-group-item">
+                             <h5>{{history.userName}} edited the amount from {{history.oldValue}} to {{history.newValue}}</h5>
+                             <i>{{history.modifiedTime | date:'short'}}</i>
+                            </div>
+                        </li>
+                        <li *ngIf="history.action === 'edited the whpoaid'">
+                            <div class="list-group-item">
+                             <h5>{{history.userName}} edited the payor from {{history.oldValue}} to {{history.newValue}}</h5>
+                             <i>{{history.modifiedTime | date:'short'}}</i>
+                            </div>
+                        </li>
+                        <li *ngIf="history.action === 'added people'">
+                            <div class="list-group-item">
+                             <h5>{{history.userName}} add {{history.newPeople.length}} people</h5>
+                             <ul *ngFor = "let people of history.newPeople">
+                              <li>{{people.name}}</li>
+                             </ul>
+                             <i>{{history.modifiedTime | date:'short'}}</i>
+                            </div>
+                        </li>
+                        <li *ngIf="history.action === 'deleted people'">
+                            <div class="list-group-item">
+                             <h5>{{history.userName}} deleted {{history.oldPeople.length}} people</h5>
+                             <ul *ngFor = "let people of history.oldPeople">
+                              <li>{{people.name}}</li>
+                             </ul>
+                             <i>{{history.modifiedTime | date:'short'}}</i>
+                            </div>
+                        </li>
+                    </ul>
+
                 </div>
             </div>
         </div>
@@ -295,7 +358,7 @@
                 <div class="modal-body">
                     <div class="description">
                         <h6 class="display-8">Description</h6>
-                        <p class="lead">{{groupDetails.description}}</p>
+                        <p class="lead">{{groupDetails?.description}}</p>
                     </div>
                     <hr class="my-4">
                     <h4 class="center participants">participants<span
@@ -313,11 +376,11 @@
                 <div class="modal-footer">
                     <div>
                         <label>@Creator Of Group:</label>
-                        <strong> <em> {{groupDetails.createdBy.userName}}</em> </strong>
+                        <strong> <em> {{groupDetails?.createdBy.userName}}</em> </strong>
                     </div>
                     <div>
                         <label>created at:</label>
-                        <strong>{{groupDetails.groupGenerationTime | date:'medium'}}</strong>
+                        <strong>{{groupDetails?.groupGenerationTime | date:'medium'}}</strong>
                     </div>
                 </div>
             </div>
@@ -338,56 +401,52 @@
                 <div class="modal-body">
                     <form #expenseForm="ngForm" (ngSubmit)="createExpense();expenseForm.reset()">
 
-                        {{expenseInfo| json}}
+                        
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label">Expense:</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" [(ngModel)]="expenseInfo.expenseName"
-                                    name="expenseName">
+                                <input type="text" class="form-control" [(ngModel)]="expenseInfo.expenseName" #ename="ngModel"
+                                    name="expenseName" required  [class.is-invalid]="ename.invalid && ename.touched">
+                                    <small class="text-danger" [class.d-none]="ename.valid || ename.untouched">Expense Name is Required</small>
+
 
                             </div>
                         </div>
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label">Amount:</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="amount" [(ngModel)]="expenseInfo.amount">
+                                <input type="text" class="form-control" required name="amount" #eamount="ngModel" [(ngModel)]="expenseInfo.amount" [class.is-invalid]="eamount.invalid && eamount.touched">
+                                <small class="text-danger" [class.d-none]="eamount.valid || eamount.untouched">Amount feild is Required</small>
 
                             </div>
                         </div>
                         <div class="form-group row">
                             <div class="col-sm-8">People Involved:</div>
                             <div class="col-sm-10">
-                                <!-- <div class="form-check check" *ngFor = 'let participant of groupMembers' >
-                                    <input class="form-check-input" type="checkbox"  ngModel  [value] = "participant.userId" name="people">
-                                    <label class="form-check-label" for="gridCheck1">
-                                        {{participant.userName}}
-                                    </label>
-                                </div> -->
-                                <select name="people" [(ngModel)]="expenseInfo.people" multiple>
+                                <select name="people" #epeople = "ngModel" [(ngModel)]="expenseInfo.people" data-toggle="tooltip" data-placement="top" title="Hold ctrl button and select the users you want" multiple required >
                                     <option *ngFor="let participant of groupMembers"
                                         [ngValue]="{id:participant.userId,name:participant.userName}">
                                         {{ participant.userName }}
                                     </option>
                                 </select>
-                                <!-- <ng-multiselect-dropdown [placeholder]="'people involved in expense '" [data]="groupMembers"
-                                    [(ngModel)]="checkedUsers" [settings]="dropdownSettings" name="people"></ng-multiselect-dropdown> -->
-
                             </div>
                         </div>
                         <div class="form-group row">
                             <div class="col-sm-8">Payor:</div>
                             <div class="col-sm-6 selection">
                                 <select id="inputState" class="form-control" name="payor"
-                                    [(ngModel)]="expenseInfo.whoPaid">
+                                    [(ngModel)]="expenseInfo.whoPaid" required #epayor = "ngModel" [class.is-invalid]="epayor.invalid && epayor.touched" >
                                     <option [ngValue]="{id:participant.id,name:participant.name}"
                                         *ngFor='let participant of expenseInfo.people'>
                                         {{participant.name}}</option>
                                 </select>
+                                <small class="text-danger" [class.d-none]="epayor.valid || epayor.untouched">choose payor</small>
+
                             </div>
                         </div>
                         <div class="form-group row ">
                             <div class="col-sm-10 submission">
-                                <button type="submit " class="btn btn-primary">Create</button>
+                                <button type="submit " [disabled]="expenseForm.form.invalid" class="btn btn-primary">Create</button>
                             </div>
                         </div>
                     </form>
@@ -395,38 +454,3 @@
             </div>
         </div>
     </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

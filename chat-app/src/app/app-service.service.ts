@@ -23,6 +23,14 @@ export class AppServiceService {
     return this.http.post(`${this.url}/signup`,params);
 
   }
+  public getCountryNames(){
+    return this.http.get('../assets/CountryList.json');
+  
+  }
+  public getCountryNumbers(){
+    return this.http.get('../assets/CountryCodes.json');
+  }
+
 
  public login(data):Observable<any>{
       const params = new HttpParams().
@@ -30,6 +38,20 @@ export class AppServiceService {
       .set('password',data.password);
       return this.http.post(this.url+'/login',params);
 
+  }
+
+  public forgotPassword (email):Observable<any>{
+    console.log('in app service0',email);
+    const params = new HttpParams()
+    .set('email',email);
+    return this.http.post(this.url+'/resetpassword',params);
+  }
+
+  public resetPassword (rpassword , newpassword):Observable<any>{
+    const params = new HttpParams()
+    .set('recoveryPassword',rpassword)
+    .set('password',newpassword);
+    return this.http.post(this.url+'/updatepassword',params);
   }
 
   public groupCreation(name,description):Observable<any>{
@@ -58,6 +80,10 @@ export class AppServiceService {
     .set('limit',limit)
     .set('groupName',groupName);
     return this.http.post(this.url+'/getexpenses',params);
+  }
+
+  public getExpenseHistory(expenseId):Observable<any>{
+    return this.http.get(this.url+'/getexpensehistory/'+expenseId);
   }
 
   public logout(): Observable<any> {

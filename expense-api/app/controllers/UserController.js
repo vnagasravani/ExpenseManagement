@@ -123,7 +123,7 @@ let signUp = (req, res) => {
     let validateUserInput = (req, res) => {
         return new Promise((resolve, reject) => {
             logger.info('validation is starting');
-            if (req.body.email) {
+            if (!check.isEmpty(req.body.email)) {
                 if (!validation.Email(req.body.email)) {
                     let apiresponse = response.generate(true, 'email does not meet the requirements', 500, null);
                     reject(apiresponse);
@@ -185,7 +185,7 @@ let signUp = (req, res) => {
                         }
                         else {
                             logger.info(retrivedDetails);
-                            let apiresponse = response.generate(true, 'A user is already existed with same eamil id ', 500, null);
+                            let apiresponse = response.generate(true, 'A user is already existed with same email id ', 500, null);
                             reject(apiresponse);
                             // console.log('a user is already existed with this email');
                         }
@@ -425,8 +425,9 @@ let logout = (req, res) => {
 let resetPasswordFunction=(req,res)=>{
 
     let checkUserEmail=()=>{
+        console.log('while checkUserMail',req.body.email);
         return new Promise((resolve,reject)=>{
-            if(req.body.email){
+            if(!check.isEmpty(req.body.email)){
                 
                 userModel.findOne({'email':req.body.email},(err,result)=>{
                     if(err){
@@ -435,11 +436,14 @@ let resetPasswordFunction=(req,res)=>{
                         reject(apiResponse);
                     }
                     else if(check.isEmpty(result)){
-                        logger.error('detail not found while resetting password');
-                        let apiResponse=response.generate(true,'email Id is not valid',500,null)
+                        logger.error('user not found while resetting password');
+                        let apiResponse=response.generate(true,'email Id is not valid',404,null)
                         reject(apiResponse);
                     }
+                    else{
+                    logger.info(result);
                     resolve(result);
+                    }
                 })
             }
             else{
@@ -455,7 +459,7 @@ let resetPassword=(userDetail)=>{
             recoveryPassword:shortid.generate()
         }
 
-        userModel.updateOne({'userId':userDetail.userId},recovery,(err,result)=>{
+        userModel.findOneAndUpdate({'userId':userDetail.userId},recovery,(err,result)=>{
             if(err){
                 logger.error('some error occured while setting recovery password');
                 let apiResponse=response.generate(true,'error occured',500,null)
@@ -466,22 +470,26 @@ let resetPassword=(userDetail)=>{
                 let apiResponse=response.generate(true,'recoveryPassword is not being updated',500,null)
                 reject(apiResponse);
             }
+            else{
             resolve(result);
+            console.log('while sending mail',userDetail.email);
             let mailOptions={
                 from:'vnags@SpeechGrammarList.com',
                 to:userDetail.email,
                 subject:"password reset",
                 html: `<h4> Hi ${userDetail.firstName}</h4>
                        <p>
-                           We got a request to reset your To-Do list account password associated with this ${req.body.email} Email. <br>
+                           We got a request to reset your Expense Management account password associated with this ${req.body.email} Email. <br>
                            <br>We have successfully reset your password. Please use following password as a recovery password while resetting the Password <br>
                            <br> Recovery Password : ${recovery.recoveryPassword} 
                        </p>
-                        To-Do List
-                        <br><b>Ashish mangukiya </b> `    
+                        ExpenseManagement
+                        <br><b>v sravani </b> `    
     
             }
             emailLib.sendEmail(mailOptions);
+        }
+        
         })
     })
 }
@@ -497,11 +505,13 @@ let resetPassword=(userDetail)=>{
 
 }//end reset password function
 
+
 let updatePasswordFunction = (req, res) => {
 
     let findUser = () => {
+        console.log('recoveryPassword' , req.body.recoveryPassword);
         return new Promise((resolve, reject) => {
-            if (req.body.recoveryPassword) {
+            if (!check.isEmpty(req.body.recoveryPassword)) {
                 userModel.findOne({ recoveryPassword: req.body.recoveryPassword }, (err, userDetails) => {
                     /* handle the error here if the User is not found */
                     if (err) {
@@ -549,22 +559,22 @@ let updatePasswordFunction = (req, res) => {
                     reject(apiResponse)
                 } else {
 
-
-                    let apiResponse = response.generate(false, 'Password Updated successfully', 200, result)
-                    resolve(apiResponse)
-                    //Creating object for sending welcome email
-                    transporter.sendMail({
+                    let mailOptions={
                         from:'vnags@SpeechGrammarList.com',
                         to:userDetails.email,
-                        subject:"password update",
-                        html:`<p>password updated successfully</p>`
-        
-                    }).then(data=>{
-                        logger.info(data);
-                    })
+                        subject:"password reset",
+                        html: `<h4> Hi ${userDetails.firstName}</h4>
+                               <p>
+                                   password updated suucessfully 
+                               </p>
 
-                    
-
+                                ExpenseManagement
+                                <br><b>v sravani </b> `    
+            
+                    }
+                    emailLib.sendEmail(mailOptions);
+                    let apiResponse = response.generate(false, 'Password Updated successfully', 200, result)
+                    resolve(apiResponse);
 
                 }
             });// end user model update

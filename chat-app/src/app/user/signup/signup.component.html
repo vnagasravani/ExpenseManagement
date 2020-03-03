@@ -1,86 +1,116 @@
 <nav class="navbar navbar-expand-md navbar-dark bg-dark">
 
-    <a class="navbar-brand" href="/">Expense Management</a>
-  
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-      aria-expanded="false" aria-label="Toggle navigation">
-  
-      <span class="navbar-toggler-icon"></span>
-  
-    </button>
-  
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-  
-      <ul class="navbar-nav mr-auto">
-  
-        <li class="nav-item">
-  
-          <a class="nav-link" (click)="goToSignIn()">Sign-In</a>
-  
-        </li>
-  
-      </ul>
-  
-    </div>
-  
-  </nav>
-  
-  <div class="row p-0 m-0">
-  
-    <div class="col-sm"></div>
-  
-    <div class="col-sm p-5">
-  
-      <h2 class="form-signin-heading">Sign Up</h2>
-  
-      <br>
+  <a class="navbar-brand" href="/">Expense Management</a>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+
+    <span class="navbar-toggler-icon"></span>
+
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+    <ul class="navbar-nav mr-auto">
+
+      <li class="nav-item">
+
+        <a class="nav-link" (click)="goToSignIn()">Sign-In</a>
+
+      </li>
+
+    </ul>
+
+  </div>
+
+</nav>
+
+<div class="row p-0 m-0">
+
+  <div class="col-sm"></div>
+
+  <div class="col-sm p-5">
+
+    <h2 class="form-signin-heading">Sign Up</h2>
+
+    <br>
+
+    <form #signupform="ngForm" (ngSubmit)="signupform.reset()">
+
   
       <span>FirstName: </span>
-  
+
       <label for="inputFirstName" class="sr-only">FirstName</label>
-  
-      <input type="text" name="inputFirstName" class="form-control" [(ngModel)]="firstName" placeholder="FirstName" required autofocus>
-  
+
+      <input type="text" name="fname" #name="ngModel" class="form-control"
+        [class.is-invalid]="name.invalid && name.touched" [(ngModel)]="firstName" placeholder="FirstName" required
+        autofocus>
+      <small class="text-danger" [class.d-none]="name.valid || name.untouched">First Name is Required</small>
+
       <br>
-  
+
       <span>LastName: </span>
-  
+
       <label for="inputLastName" class="sr-only">LastName</label>
-  
-      <input type="text" name="inputLastName" class="form-control" [(ngModel)]="lastName" placeholder="LastName" required>
-  
+
+      <input type="text" name="inputLastName" #lname="ngModel" class="form-control"
+        [class.is-invalid]="lname.invalid && lname.touched" [(ngModel)]="lastName" placeholder="LastName" required>
+      <small class="text-danger" [class.d-none]="lname.valid || lname.untouched">Last Name is Required</small>
+
+
       <br>
-  
+
+      <span>Country: </span>
+
+      <label for="inputCountry" class="sr-only">Country: </label>
+      <select [(ngModel)]="country" name="country" class="form-control" #inputCountry="ngModel" (click)="onChangeOfCountry()"
+        required [class.is-invalid]="inputCountry.invalid && inputCountry.touched">
+        <option *ngFor="let country of countries" [value]="country.code">{{country.name}}</option>
+      </select>
+      <small class="text-danger" [class.d-none]="inputCountry.valid || inputCountry.untouched">choose one country</small>
+
+
+      <br>
       <span>Mobile: </span>
-  
+
       <label for="inputMobile" class="sr-only">Mobile</label>
-  
-      <input type="number" name="inputMobile" class="form-control" [(ngModel)]="mobile" placeholder="Mobile" required>
-  
+
+
+      <input type="tel" name="inputMobile" #contact="ngModel" pattern="^\d{10}$" class="form-control"
+        [class.is-invalid]="contact.invalid && contact.touched" [(ngModel)]="mobile" placeholder="Mobile" required>
+      <small class="text-danger" [class.d-none]="contact.valid || contact.untouched">Mobilenumber is required and it
+        should contain 10 digits</small>
+
+
       <br>
-  
+
       <span>Email: </span>
-  
+
       <label for="inputEmail" class="sr-only">Email address</label>
-  
-      <input type="email" name="inputEmail" class="form-control" [(ngModel)]="email" placeholder="Email address" required>
-  
+
+      <input type="email" name="inputEmail" #mail="ngModel" class="form-control" [(ngModel)]="email"
+        [class.is-invalid]="mail.invalid && mail.touched" placeholder="Email address" required>
+      <small class="text-danger" [class.d-none]="mail.valid || mail.untouched">email is Required</small>
+
+
+
       <br>
-  
+
       <span>Password: </span>
-  
+
       <label for="inputPassword" class="sr-only">Password</label>
-  
-      <input type="password" name="inputPassword" class="form-control" [(ngModel)]="password" placeholder="Password" required>
-  
+
+      <input type="password" name="inputPassword" #pword="ngModel" [class.is-invalid]="pword.invalid && pword.touched"
+        class="form-control" [(ngModel)]="password" placeholder="Password" required>
+      <small class="text-danger" [class.d-none]="pword.valid || pword.untouched">password is Required</small>
+
+
       <br>
-  
-      <button class="btn btn-lg btn-primary btn-block" type="button" (click)="signupFunction()">Sign Up</button>
-  
-    </div>
-  
-    <div class="col-sm"></div>
-  
+
+      <button class="btn btn-lg btn-primary btn-block" [disabled]="signupform.form.invalid" type="submit" (click)="signupFunction()">Sign Up</button>
+    </form>
   </div>
-  
-  
+
+  <div class="col-sm"></div>
+
+</div>

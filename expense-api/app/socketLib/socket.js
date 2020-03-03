@@ -78,6 +78,32 @@ let setServer = (server) => {
             })
         })//end set-user
 
+        socket.on('get-expenses',data=>{
+            expenseModel.find({groupName:data.groupName})
+        .select(' -__v -_id')
+        .skip(data.skip * 6)
+        .lean()
+        .limit(data.limit)
+        .exec((err, result) => {
+            if (err) {
+                console.log(err)
+                logger.info( 'Expense Controller: err in getAllexpenses '+err);
+                let apiResponse = response.generate(true, 'Failed To Find Expenses', 500, null);
+                socket.emit('get-expenses-response',apiResponse);
+            } else if (checkLib.isEmpty(result)) {
+                logger.info( 'Expense Controller: getAllexpenses is not found')
+                let apiResponse = response.generate(true, 'No Expense Found', 404, null)
+                socket.emit('get-expenses-response',apiResponse);
+
+            } else {
+                let apiResponse = response.generate(false, 'All Expenses Found', 200, result)
+                socket.emit('get-expenses-response',apiResponse);
+
+            }
+        })
+
+        });
+
         socket.on('search-user', (userName) => {
 
             userModel.find({ firstName: { $regex: userName } })
@@ -721,7 +747,7 @@ let setServer = (server) => {
 
             let addExpenseToHistory = (expenseDetails) => {
                 return new Promise((resolve, reject) => {
-                    expenseHistoryModel.findOneAndUpdate({ expenseId: expenseDetails.expenseId }, { $push: { expenseHistory: { userId: details.userId, userName: details.userName, action: 'deleted people' } } }, { new: true })
+                    expenseHistoryModel.findOneAndUpdate({ expenseId: expenseDetails.expenseId }, { $push: { expenseHistory: { userId: details.userId, userName: details.userName, action: 'deleted people',oldPeople :details.people } } }, { new: true })
                         .exec((err, result) => {
                             if (err) {
                                 logger.info('failed to update expensehistory while add delete people in  expense history');
@@ -742,7 +768,7 @@ let setServer = (server) => {
             let editExpense = (expenseDetails) => {
                 console.log('edit expense function is called');
                 return new Promise((resolve, reject) => {
-                    expenseModel.findOneAndUpdate({ expenseId: expenseDetails.expenseId }, { $pull: { people: { id:{$in:details.people} } } }, { new: true })
+                    expenseModel.findOneAndUpdate({ expenseId: expenseDetails.expenseId }, { $pull: { people: { id:{$in:details.users} } } }, { new: true })
                         .exec((err, result) => {
                             if (err) {
                                 logger.info(err);

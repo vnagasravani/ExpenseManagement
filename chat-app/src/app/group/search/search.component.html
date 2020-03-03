@@ -3,15 +3,22 @@
         <div class="card-header header">
             Add Participants
         </div>
+        <div *ngIf="loading">
+            <ngx-spinner type="pacman" size = "medium"></ngx-spinner>
+            </div>
         <div class="card-body">
             <div class="search input-group">
-            <input type="text" class="form-control" #searchInput placeholder="search here to find users..." (keypress)="search($event)">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" >
+                        <i class="fa fa-search icon " aria-hidden="true"></i>
+                      </span>
+                  </div>
+            <input type="text" class="form-control" #searchInput placeholder="search here.." (keypress)="search($event)">
             <span *ngIf=searching> <button class="clear" (click)="unsearch()">clear</button> </span>
         </div>
-            
-
+        
             <div class="row cardsbody" *ngIf="!searching">
-                <div class=" col-md-3 cards" *ngFor="let user of users">
+                <div class=" col-md-3 col-sm-4 col-6 cards" [@usersList] *ngFor="let user of users">
                     <div class="card icard">
                         <div class="card-body">
                             <h5 class="card-title">{{user.userName}}</h5>
@@ -24,7 +31,7 @@
 
 
             <div class="row cardsbody" >
-                <div class=" col-md-3 cards" *ngFor="let suser of searchedUsers">
+                <div class=" col-md-3 col-sm-4 col-6 cards" [@usersList] *ngFor="let suser of searchedUsers">
                     <div class="card icard">
                         <div class="card-body">
                             <h5 class="card-title">{{suser.userName}}</h5>

@@ -45,7 +45,10 @@ let sendMails = (groupDetails , apiResponse)=>{
             from: 'expenseManagement@gmail.com',
             to: group.email,
             subject: 'notification',
-            html: `<p>Hi ${group.userName}</p> <br> <p>${apiResponse.message} </p>`
+            html: `<p>Hi ${group.userName}</p> <br> <p>The expense ${apiResponse.data.expenseName}  ${apiResponse.message} </p>
+            <br> <br>
+            From<br>
+            Expense Management team`
         }
      sendEmail(emailOptions);
         

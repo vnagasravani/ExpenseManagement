@@ -9,6 +9,7 @@ import { AngularFontAwesomeModule } from 'angular-font-awesome';
 //import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 import { ToastrModule } from 'ngx-toastr';
 import { FormsModule } from '@angular/forms';
+import { NgxSpinnerModule } from 'ngx-spinner';
 
 
 
@@ -18,6 +19,7 @@ import { FormsModule } from '@angular/forms';
     CommonModule,
     BrowserAnimationsModule,
     AngularFontAwesomeModule,
+    NgxSpinnerModule,
     FormsModule,
     ToastrModule.forRoot(),
    // NgMultiSelectDropDownModule.forRoot(),

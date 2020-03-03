@@ -1,15 +1,34 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { AppServiceService } from 'src/app/app-service.service';
+import { NgxSpinnerService } from "ngx-spinner"
 import { SocketserviceService } from 'src/app/socketservice.service';
 import { ActivatedRoute } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Cookie } from 'ng2-cookies/ng2-cookies';
 import { identifierModuleUrl } from '@angular/compiler';
+import { transition, trigger, style, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-search',
   templateUrl: './search.component.html',
-  styleUrls: ['./search.component.css']
+  styleUrls: ['./search.component.css'],
+  animations: [
+    trigger('usersList', [
+      transition('void => *', [
+        style({
+          opacity: 0,
+          transform: 'translateX(-100px)'
+        }),
+        animate(300)
+      ]),
+      transition('* => void', [
+        animate(300, style({
+          transform: 'translateX(100px)',
+          opacity: 0
+        }))
+      ])
+    ])
+  ]
 })
 export class SearchComponent implements OnInit {
   public users = [];
@@ -17,6 +36,7 @@ export class SearchComponent implements OnInit {
   public groupMembers = [];
   public groupDetails ;
   public groupName ;
+  public loading = true;
   public searchingValue = '';
   public pageValue = 0;
   public limit = 8;
@@ -25,12 +45,13 @@ export class SearchComponent implements OnInit {
 
   @ViewChild('searchInput', { static: true }) searchInput: ElementRef;
 
-  constructor(private AppService: AppServiceService, private SocketService: SocketserviceService ,private route:ActivatedRoute,private toastr: ToastrService) { }
+  constructor(private AppService: AppServiceService, private SocketService: SocketserviceService ,private route:ActivatedRoute,private toastr: ToastrService,private spinner:NgxSpinnerService) { }
 
   ngOnInit() {
     this.getUsers(this.pageValue, this.limit);
     this.groupName=this.route.snapshot.paramMap.get('groupName');
     this.getGroupMembers(this.groupName);
+    this.spinner.show();
     
   }
 
@@ -60,12 +81,14 @@ export class SearchComponent implements OnInit {
     this.AppService.getAllUsers(pageValue, limit).subscribe(
       (data) => {
         if (data.status == 200) {
+          this.loading = false;
           this.users = data.data.users;
           this.Usercount = data.data.userCount;
          }
       },
       (err) => {
         console.log(err);
+        this.toastr.error('some error occured');
       });
   }//end getUsers
 
@@ -80,6 +103,7 @@ export class SearchComponent implements OnInit {
       },
       (err)=>{
          console.log(err);
+         this.toastr.error('some error occured');
       });
   }//end get group members
 
@@ -94,7 +118,12 @@ export class SearchComponent implements OnInit {
           this.groupMembers = data.data.groupMembers;
           this.toastr.success('user added successfully to group');
         }
-      })
+      },
+      (err)=>{
+        console.log(err);
+        this.toastr.error('some error occured');
+     }
+      );
   }//end add
 
   public addDisable = (userId) =>{

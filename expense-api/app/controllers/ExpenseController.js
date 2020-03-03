@@ -314,9 +314,9 @@ let getAllExpenses = (req, res) => {
     console.log(req.body.groupName);
     expenseModel.find({groupName:req.body.groupName})
         .select(' -__v -_id')
-        .skip(skip * 6)
+        .skip(skip * limit)
         .lean()
-        .limit(6)
+        .limit(limit)
         .exec((err, result) => {
             if (err) {
                 console.log(err)

@@ -1,32 +1,40 @@
 <div class="fluid-container">
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand">Expense Management</a>
+  <nav class="navbar navbar-expand-lg  navbar-custom ">
+    <a class="navbar-brand"><img src = "./../../../assets/expensify-icon.jpg"> Expense Management</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
+      <span class="navbar-toggler-icon"><i class="fa fa-navicon" style="color:#fff; font-size:28px;"></i></span>
     </button>
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav mr-auto">
+      <ul class="navbar-nav">
         <li>
-          <a  class="nav-link" href="#" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">create Group</a>
+          <a class="nav-link pointer"  data-toggle="modal" data-target="#exampleModal" >CreateGroup
+            </a>
         </li>
       </ul>
       <ul class="navbar-nav ml-auto">
         <li class="nav-item  my-2 my-lg-0 ">
-          <div class="input-group">
+          <div class="input-group search ">
+            <div class="input-group-prepend ">
+              <span class="input-group-text" >
+                  <i class="fa fa-search icon " aria-hidden="true"></i>
+                </span>
+            </div>
             <input class=" form-control col-10 " type="text" placeholder="Search" #searchInput
               (keyup.enter)="searchGroup()">
-               
-            <span *ngIf=searchValue> <button class="clear" (click)="unsearch()">
-              X
+            
+              <div class="input-group-append">
+            <span *ngIf=searchValue> <button class="clear " (click)="unsearch()">
+                X
               </button>
             </span>
+              </div>
           </div>
         </li>
 
         <li class="nav-item ">
-          <a class="nav-link" (click)="logout()">Logout</a>
+          <a class="nav-link pointer " (click)="logout()">Logout</a>
         </li>
       </ul>
     </div>
@@ -36,50 +44,73 @@
   </div>
   <div class="list-group ">
     <ng-container *ngIf=!searchValue>
-      <div *ngFor="let group of groups">
-        <a  class="list-group-item list-group-item-action active group-list" [routerLink]="['/group',group.groupName]">
-          {{group.groupName}}
-        </a>
-        
+      <div *ngIf="loading">
+      <ngx-spinner type="pacman" size = "medium"></ngx-spinner>
+      </div>
+      <div class="row">
+        <div class="col-xl-3 col-md-4 col-6 groups" *ngFor="let group of groups" [@groupList]>
+          <div class="card ">
+            <div class="card-header bg-info text-center">
+              {{group.groupName}}
+            </div>
+            <div class="card-body">
+              <p class="card-text">This group was created on {{group.groupGenerationTime | date:'short'}} </p>
+              <a [routerLink]="['/group',group.groupName]" class="btn btn-outline-secondary">view</a>
+            </div>
+          </div>
+        </div>
       </div>
     </ng-container>
-
-    <div *ngFor="let fgroup of filteredGroups">
-      <a  class="list-group-item list-group-item-action active group-list" [routerLink]="['/group',fgroup.groupName]" >
-        {{fgroup.groupName}}
-      </a>
+    <div class="row">
+      <div class="col-xl-3 col-md-4 col-6 groups " *ngFor="let fgroup of filteredGroups" [@groupList]>
+        <div class="card">
+          <div class="card-header bg-info text-center">
+            {{fgroup.groupName}}
+          </div>
+          <div class="card-body">
+            <p class="card-text">This group was created on {{fgroup.groupGenerationTime | date:'short'}} </p>
+            <a [routerLink]="['/group',fgroup.groupName]" class="btn btn-outline-secondary text-center">view</a>
+          </div>
+        </div>
+      </div>
     </div>
 
   </div>
 
 
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Create Group</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form>
-          <div class="form-group">
-            <label for="groupName" class="col-form-label" >GroupName:</label>
-            <input type="text" class="form-control" #name>
-            <div class="form-group shadow-textarea">
-              <label for="description">Desription</label>
-              <textarea class="form-control z-depth-1" #description rows="3" placeholder="Write group description here..."></textarea>
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Create Group</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form #group="ngForm" (ngSubmit)="group.reset()">
+          <div class="modal-body">
+
+            <div class="form-group">
+              <label for="groupName" class="col-form-label">GroupName:</label>
+              <input type="text" class="form-control" #name name = "group" ngModel>
+              <div class="form-group shadow-textarea">
+                <label for="description">Desription</label>
+                <textarea class="form-control z-depth-1" #description name = "des" ngModel rows="3"
+                  placeholder="Write group description here..."></textarea>
+              </div>
+
             </div>
 
           </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary" (click)="createGroup(name.value,description.value)">create
+              group</button>
+          </div>
         </form>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" (click)="createGroup(name.value,description.value)">create group</button>
-      </div>
+
     </div>
   </div>
-</div>
 </div>

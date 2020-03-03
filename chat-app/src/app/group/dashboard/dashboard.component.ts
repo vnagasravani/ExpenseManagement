@@ -1,31 +1,55 @@
 import { Component, OnInit ,ViewChild ,  ElementRef} from '@angular/core';
-
+import { NgxSpinnerService } from "ngx-spinner"
 import {AppServiceService} from './../../app-service.service'
 import { ToastrService } from 'ngx-toastr';
 import {Cookie} from 'ng2-cookies/ng2-cookies';
 import { Router } from '@angular/router';
 import { SocketserviceService } from 'src/app/socketservice.service';
+import { trigger, state, style, transition, animate, keyframes } from '@angular/animations';
+
+
 
 
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css']
+  styleUrls: ['./dashboard.component.css'],
+  animations: [
+    trigger('groupList', [
+      transition('void => *', [
+        style({
+          opacity: 0,
+          transform: 'translateX(-100px)'
+        }),
+        animate(300)
+      ]),
+      transition('* => void', [
+        animate(300, style({
+          transform: 'translateX(100px)',
+          opacity: 0
+        }))
+      ])
+    ])
+  ]
 })
 export class DashboardComponent implements OnInit {
   public groups = [];
   public filteredGroups = [];
   public userId = Cookie.get('userId');
   public searchValue = false;
+  public loading =  true;
   
 
   @ViewChild('searchInput', {static: true}) searchInput: ElementRef;
 
-  constructor(private appService:AppServiceService,private router:Router,private toastr: ToastrService,private socketService:SocketserviceService) { }
+  constructor(private appService:AppServiceService,private router:Router,private toastr: ToastrService,private socketService:SocketserviceService,private spinner:NgxSpinnerService) { }
 
   ngOnInit() {
    this. getUser(this.userId);
+
+   this.spinner.show();
+
   }
 
   public searchGroup=()=>{
@@ -50,6 +74,12 @@ export class DashboardComponent implements OnInit {
 
   public createGroup = (name , description)=>{
     console.log(name);
+    if(name == undefined || name =='')
+    {
+      this.toastr.warning('enter Groupname');
+    }
+    else
+    {
      this.appService.groupCreation(name , description).subscribe(
        (data)=>{
           if(data.status==200){
@@ -65,17 +95,21 @@ export class DashboardComponent implements OnInit {
        },
        (err)=>{
         console.log(err.message);
-       }
-     )
+        this.toastr.error('error occured');
+       })
+     
+      }
   }
 
 public getUser = (userId)=>{
 this.appService.getUser().subscribe(
   (data)=>{
+    this.loading = false;
    this.groups = data.data.groupsList
    console.log(this.groups);
   },
   (error)=>{
+    this.toastr.error('some error occured');
     console.log(error);
   }
 

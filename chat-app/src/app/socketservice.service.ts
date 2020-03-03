@@ -7,6 +7,7 @@ import { User } from 'src/Interfaces/user';
 import { AddGroupResponse } from 'src/Interfaces/AddGroupResponse';
 import { ExpenseInfo } from 'src/Interfaces/ExpenseInfo';
 import { ExpenseResponse } from 'src/Interfaces/ExpenseResponse';
+import { Expenses } from 'src/Interfaces/Expenses';
 
 
 
@@ -77,6 +78,14 @@ export class SocketserviceService {
     });
   }//end searched result
 
+public getExpenesResponse = ()=>{
+  return new Promise<Expenses>((resolve, reject) => {
+    this.socket.on('get-expenses-response', (data) => {
+      console.log('socket service', data);
+      resolve(data);
+    }); // end Socket
+  });
+}//end getExpenesResponse
 
   public expenseResponse = () => {
     return new Promise<ExpenseResponse>((resolve, reject) => {
@@ -157,6 +166,14 @@ export class SocketserviceService {
     this.socket.emit('set-user', authToken);
   }//end set user
 
+  public getExpenses = (groupName,pageValue,limit)=>{
+    this.socket.emit('get-expenses',{
+      groupName:groupName,
+      skip:pageValue,
+      limit:limit
+    })
+  }
+
   public delExpense = (expenseId) => {
     console.log('delExpense socket is emiitted');
     this.socket.emit(`delete-an-expense`, {
@@ -182,7 +199,7 @@ export class SocketserviceService {
       expenseId: expenseId,
       people: people
     })
-  }//end editAmount
+  }//end editpeople
 
 
   public editWhoPaid = (expenseId, whoPaid) => {
@@ -195,13 +212,14 @@ export class SocketserviceService {
     })
   }//end editWhoPaid
 
-  public removePeople = (expenseId, people) => {
+  public removePeople = (expenseId, people,users) => {
 
     this.socket.emit('delete-people', {
       userName: Cookie.get('userName'),
       userId: Cookie.get('userId'),
       expenseId: expenseId,
-      people: people
+      people: people,
+      users:users
     })
   }//end removePeople
 
